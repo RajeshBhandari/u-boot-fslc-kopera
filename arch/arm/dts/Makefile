@@ -405,6 +405,17 @@ dtb-$(CONFIG_MX7) += imx7-colibri.dtb \
 
 dtb-$(CONFIG_ARCH_MX7ULP) += imx7ulp-evk.dtb
 
+dtb-$(CONFIG_ARCH_IMX8M) += fsl-imx8mq-evk.dtb \
+		fsl-imx8mq-ddr3l-arm2.dtb \
+		fsl-imx8mq-ddr4-arm2.dtb \
+		fsl-imx8mq-phanbell.dtb \
+		fsl-imx8mm-ddr3l-val.dtb \
+		fsl-imx8mm-ddr4-evk.dtb \
+		fsl-imx8mm-ddr4-val.dtb \
+		fsl-imx8mm-evk.dtb \
+		fsl-imx8mq-var-dart.dtb \
+		fsl-imx8mm-var-dart.dtb
+
 dtb-$(CONFIG_RCAR_GEN3) += \
 	r8a7795-h3ulcb.dtb \
 	r8a7795-salvator-x.dtb \

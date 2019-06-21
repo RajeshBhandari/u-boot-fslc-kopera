@@ -15,6 +15,10 @@
 #include <post.h>
 #include <u-boot/sha256.h>
 
+#ifdef is_boot_from_usb
+#include <environment.h>
+#endif
+
 DECLARE_GLOBAL_DATA_PTR;
 
 #define MAX_DELAY_STOP_STR 32

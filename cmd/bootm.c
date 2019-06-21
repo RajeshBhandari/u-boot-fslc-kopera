@@ -123,6 +123,81 @@ int do_bootm(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 			return do_bootm_subcommand(cmdtp, flag, argc, argv);
 	}
 
+#ifdef CONFIG_SECURE_BOOT
+	extern int authenticate_image(
+			uint32_t ddr_start, uint32_t raw_image_size);
+
+	ulong bootm_loadaddr;
+
+	if (!argc) {
+		bootm_loadaddr = load_addr;
+		debug("*  kernel: default image load address = 0x%08lx\n",
+				load_addr);
+	} else {
+		bootm_loadaddr = simple_strtoul(argv[0], NULL, 16);
+		debug("*  kernel: cmdline image address = 0x%08lx\n",
+				bootm_loadaddr);
+	}
+
+#ifdef CONFIG_IMX_OPTEE
+	ulong tee_addr = 0;
+	int ret;
+	ulong zi_start, zi_end;
+
+	tee_addr = env_get_ulong("tee_addr", 16, tee_addr);
+	if (!tee_addr) {
+		printf("Not valid tee_addr, Please check\n");
+		return 1;
+	}
+
+	switch (genimg_get_format((const void *)tee_addr)) {
+	case IMAGE_FORMAT_LEGACY:
+		if (authenticate_image(tee_addr,
+		       image_get_image_size((image_header_t *)tee_addr)) != 0) {
+		       printf("Authenticate uImage Fail, Please check\n");
+		       return 1;
+		}
+		break;
+	default:
+		printf("Not valid image format for Authentication, Please check\n");
+		return 1;
+	};
+
+	ret = bootz_setup(bootm_loadaddr, &zi_start, &zi_end);
+	if (ret != 0)
+		return 1;
+
+	if (authenticate_image(bootm_loadaddr, zi_end - zi_start) != 0) {
+		printf("Authenticate zImage Fail, Please check\n");
+		return 1;
+	}
+
+#else
+
+	switch (genimg_get_format((const void *)bootm_loadaddr)) {
+#if defined(CONFIG_IMAGE_FORMAT_LEGACY)
+	case IMAGE_FORMAT_LEGACY:
+		if (authenticate_image(bootm_loadaddr,
+			image_get_image_size((image_header_t *)bootm_loadaddr)) != 0) {
+			printf("Authenticate uImage Fail, Please check\n");
+			return 1;
+		}
+		break;
+#endif
+#ifdef CONFIG_ANDROID_BOOT_IMAGE
+	case IMAGE_FORMAT_ANDROID:
+	default:
+		/* Android use AVB verify. Also here we cannot get IMAGE_FORMAT_ANDROID */
+		break;
+#else
+	default:
+		printf("Not valid image format for Authentication, Please check\n");
+		return 1;
+#endif /* CONFIG_ANDROID_BOOT_IMAGE */
+	}
+#endif
+#endif
+
 	return do_bootm_states(cmdtp, flag, argc, argv, BOOTM_STATE_START |
 		BOOTM_STATE_FINDOS | BOOTM_STATE_FINDOTHER |
 		BOOTM_STATE_LOADOS |

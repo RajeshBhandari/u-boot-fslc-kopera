@@ -57,6 +57,6 @@ obj-${CONFIG_VIDEO_TEGRA124} += tegra124/
 obj-${CONFIG_EXYNOS_FB} += exynos/
 obj-${CONFIG_VIDEO_ROCKCHIP} += rockchip/
 obj-${CONFIG_VIDEO_STM32} += stm32/
-
+obj-$(CONFIG_IMX_MIPI_DSI_BRIDGE) += imx_mipi_dsi_bridge.o
 obj-y += bridge/
 obj-y += sunxi/
